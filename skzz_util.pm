@@ -1,20 +1,87 @@
-BEGIN{push @INC, '/home/pals/spiders/new_spiders'};	
-BEGIN{push @INC, 'C:\Users\skz\Dropbox\prog\skzz_perl_library'};	
-#Generic utilities 
-# 6-5-12
+# ============================================
+# skzz_util.pm – Table of Contents ("doctoc")
+# ============================================
 #
-#	get_timestamp - provides SQL friendly timestamp from localtime
-
+# String and Whitespace Cleaning
+#   clean_newlines($string)           - Cleans newlines, whitespace, and &nbsp;
+#   clean_all($string)                - Removes HTML (common tags), condenses whitespace
+#   clean_all_tags($string)           - Strips all HTML tags from string
+#   clean_trim($string)               - Trims and condenses whitespace
+#   regex_clean_trim($string)         - Trims and condenses whitespace
+#
+# Hash and Array Cleaning
+#   clean_hash(\%hash)                - Cleans hash values (trim, remove non-ASCII)
+#   trim_hash(\%hash)                 - Alias for clean_hash
+#   uniq(@array)                      - Unique values from array
+#
+# Date and Time Utilities
+#   timestamp()                       - Returns SQL timestamp (YYYY-MM-DD HH:MM:SS)
+#   get_timestamp()                   - Actual timestamp implementation
+#   get_day_stamp()                   - Returns SQL date (YYYY-MM-DD)
+#   convert_mdy_to_sql($m,$d,$y)      - MM/DD/YY to SQL date
+#   convert_sql_to_mdy($date, $dt)    - SQL date to MM/DD/YY style
+#   split_date_and_time_for_sql($str) - Parses date/time string to SQL format
+#   convert_date_to_sql($date)        - Converts date string to SQL, if not already
+#   convert_date_to_short($date)      - SQL date to MM/DD/YY (2-digit year)
+#   date_to_sql($date)                - Flexible conversion to YYYY-MM-DD
+#   parse_time_from_sql($time)        - Parses time, returns hash (h/m/s/meridian)
+#   parse_date($date)                 - Parses date, returns hash (year/month/day)
+#   convert_letter_date_to_sql($d,$y) - "Jan 1, 2021" to SQL date
+#   remove_zero_from_date($str)       - Removes leading zeroes from date parts
+#   trim_leading_zero($val)           - Removes all leading zeroes from string
+#   add_leading_zeros($var, $len)     - Pads value with leading zeroes
+#   clean_small_date(...)             - Cleans/normalizes "small" dates
+#
+# Time Conversion/Processing
+#   time_w_meridian_to_sql($time)     - AM/PM time to SQL 24hr
+#   process_time_to_sql(h,m,am_pm,s)  - To SQL 24hr time
+#
+# Randomization
+#   random($low, $high)               - Random integer in range
+#
+# Regex and HTML Extraction
+#   find_in_content_tag(...)          - Extracts content between HTML tags
+#   parse_href($link)                 - Extracts href and text from <a>
+#   regex_extract_link($str)          - Extracts href from string
+#   regex_extract_number($str)        - Extracts first number from string
+#   regex_extract_date($str)          - Finds date, returns as SQL date
+#   find_regex_in_string($pat,$str)   - Finds all matches of pattern in string
+#
+# Search/Matching Utilities
+#   search_term_against_list($term, \@list)        - Returns first matching list item (word boundary)
+#   search_term_against_list_pure($term, \@list)   - Returns first item containing term (case-insensitive)
+#
+# Printing and Debugging
+#   phash(\%hash)                     - Pretty-print hash
+#   parray(\@array)                   - Pretty-print array
+#   print_char_codes($string)         - Print chars and ASCII codes
+#   print_hash(\%hash, [$dblspace])   - Print hash, optional double spacing
+#   print_hash_sorted(\%hash, [$dblspace]) - Sorted print
+#   print_array(\@array, [$dblspace]) - Print array values, optional spacing
+#
+# Table and File Utilities
+#   clean_tbl_for_view($string)       - Formats HTML tables for text viewing
+#   dump_array_to_file(\@array, [$filename], [$folder]) - Dump array to file
+#   dump_file($content, [$filename], [$folder])         - Dump string to file
+#   undump_file([$filename], [$folder])                - Reads file into array
+#   undump_file_str($delim, [$filename], [$folder])    - Reads file, returns string
+#
+# Miscellaneous
+#   print_all_methods_in_package([$className])    - Prints all symbols in a Perl package
+#   sentence_case($string)                        - Converts to sentence case
+#   test_col_vs_str_layout(\@cols, $line, [$delim])     - Print columns/values
+#   test_str_vs_str_layout($cols, $line, [$delim])      - Print columns/values from strings
+#
+# ============================================
 use strict;
 
 package skzz_util;
-my $default_output_folder = 'D:\SkzTemp';
+my $default_output_folder = '/tmp';
 my $default_output_filename = 'output.html';
-
 
 my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 my @weekDays = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-my $CURRENT_YEAR = 12;
+my $CURRENT_YEAR = 25;
 
 
 sub clean_newlines
@@ -911,3 +978,120 @@ sub sentence_case
 
 }
 
+=head1 DESCRIPTION
+
+This module provides a variety of utility functions for string cleanup, date/time formatting, SQL-friendly conversions, file dumping/loading, array/hash printing, and other helpful Perl tasks.
+
+=head1 FUNCTIONS
+
+=over 4
+
+=item * clean_newlines: Cleans up newlines and whitespace from a string. Also replaces &nbsp; with space.
+
+=item * clean_all: Removes HTML tags, multiple whitespace, and cleans up newlines and &nbsp;.
+
+=item * clean_all_tags: Strips all HTML/XML tags from a string.
+
+=item * trim_hash: Trims all values in a hash reference using clean_hash.
+
+=item * clean_hash: Runs regex_clean_trim on all values in the hash. Removes newlines and non-ASCII.
+
+=item * clean_trim: Trims leading/trailing/multiple whitespace in a string.
+
+=item * timestamp: Returns current timestamp in SQL format.
+
+=item * get_timestamp: Returns current local timestamp as "YYYY-MM-DD HH:MM:SS".
+
+=item * get_day_stamp: Returns current local date as "YYYY-MM-DD".
+
+=item * convert_mdy_to_sql: Converts month, day, year to SQL format "YYYY-MM-DD".
+
+=item * convert_sql_to_mdy: Converts SQL date "YYYY-MM-DD" to "M/D/YY" format.
+
+=item * split_date_and_time_for_sql: Splits a string with date and time to SQL date and time format.
+
+=item * convert_date_to_sql: Converts a date to SQL format "YYYY-MM-DD".
+
+=item * convert_date_to_short: Converts "YYYY-MM-DD" to "M/D/YY" format.
+
+=item * date_to_sql: Converts various date formats to SQL date.
+
+=item * parse_time_from_sql: Parses SQL time format and returns a hash with hour, minute, second, meridian.
+
+=item * parse_date: Parses a date string into year, month, day.
+
+=item * convert_letter_date_to_sql: Converts written month date (e.g. "Jan 1, 2020") to SQL date.
+
+=item * random: Returns a random integer between two values.
+
+=item * time_w_meridian_to_sql: Converts a time with AM/PM to SQL time format.
+
+=item * process_time_to_sql: Takes hour, minute, AM/PM, second and returns SQL time.
+
+=item * find_in_content_tag: Extracts content between two HTML tags.
+
+=item * parse_href: Extracts href and text from an HTML link.
+
+=item * regex_clean_trim: Regex trims leading/trailing/multiple whitespace.
+
+=item * regex_extract_link: Extracts value of href from a string.
+
+=item * regex_extract_number: Extracts first number from a string.
+
+=item * regex_extract_date: Extracts date from a string and returns SQL format.
+
+=item * find_regex_in_string: Finds all regex matches in a string.
+
+=item * uniq: Returns unique elements from a list.
+
+=item * search_term_against_list: Returns first match of a search term in a list (word boundary).
+
+=item * search_term_against_list_pure: Returns first partial match of a search term in a list.
+
+=item * phash: Prints a hash in a readable format.
+
+=item * parray: Prints an array in a readable format.
+
+=item * print_char_codes: Prints ASCII codes of each character in a string.
+
+=item * print_hash: Prints a hash using print_hash_sorted.
+
+=item * print_hash_sorted: Prints a hash sorted by keys.
+
+=item * print_array: Prints an array sorted.
+
+=item * clean_tbl_for_view: Cleans and formats HTML table for viewing.
+
+=item * trim: Trims a string's leading/trailing whitespace and reduces multiple spaces to one.
+
+=item * clean_small_date: Formats a short date (e.g. 1/1) and year to SQL or delimited format.
+
+=item * remove_zero_from_date: Removes leading zeros from a date string.
+
+=item * trim_leading_zero: Removes leading zeroes from a value.
+
+=item * add_leading_zeros: Adds leading zeros to a value to reach a target length.
+
+=item * test_col_vs_str_layout: Prints mapping of an array of columns to a delimited line of values.
+
+=item * test_str_vs_str_layout: Prints mapping of two delimited strings as columns and values.
+
+=item * dump_array_to_file: Dumps contents of array to a file.
+
+=item * dump_file: Dumps string content to a file.
+
+=item * undump_file: Reads file into an array.
+
+=item * undump_file_str: Reads file contents into a string with custom delimiter.
+
+=item * print_all_methods_in_package: Prints all methods in a given package.
+
+=item * sentence_case: Converts a string to sentence case.
+
+=back
+
+=head1 AUTHOR
+
+Dan
+
+=cut
