@@ -19,11 +19,7 @@ use Date::Manip;
  
 # CONFIG VARIABLES
 my $platform = "mysql";
-#my $database = "pals";
-#my $host = "localhost";
-#my $port = "3306";
-#my $user = "root";
-#my $pw = "80mikemike";
+
 my $dsn;
 
 my $NORMAL_LOG = './pals-db-log'; 
